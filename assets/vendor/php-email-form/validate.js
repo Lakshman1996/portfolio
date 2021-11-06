@@ -17,10 +17,10 @@
       let action = thisForm.getAttribute('action');
       let recaptcha = thisForm.getAttribute('data-recaptcha-site-key');
       
-      if( ! action ) {
-        displayError(thisForm, 'The form action property is not set!')
-        return;
-      }
+      // if( ! action ) {
+      //   displayError(thisForm, 'The form action property is not set!')
+      //   return;
+      // }
       thisForm.querySelector('.loading').classList.add('d-block');
       thisForm.querySelector('.error-message').classList.remove('d-block');
       thisForm.querySelector('.sent-message').classList.remove('d-block');
@@ -49,21 +49,31 @@
     });
   });
 
+  function removeErrors(thisForm) {
+    setTimeout(() => {
+      thisForm.querySelector('.error-message').classList.remove('d-block');
+      thisForm.querySelector('.sent-message').classList.remove('d-block');
+    }, 3000)
+  }
+
   function php_email_form_submit(thisForm, action, formData) {
-    fetch(action, {
+    const url = '/api/contact';
+    fetch(url, {
       method: 'POST',
       body: formData,
-      headers: {'X-Requested-With': 'XMLHttpRequest'}
+      headers: {  'X-Requested-With': 'XMLHttpRequest'}
     })
     .then(response => {
       if( response.ok ) {
         return response.text()
       } else {
+        removeErrors(thisForm);
         throw new Error(`${response.status} ${response.statusText} ${response.url}`); 
       }
     })
     .then(data => {
       thisForm.querySelector('.loading').classList.remove('d-block');
+      removeErrors(thisForm);
       if (data.trim() == 'OK') {
         thisForm.querySelector('.sent-message').classList.add('d-block');
         thisForm.reset(); 
